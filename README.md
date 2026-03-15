@@ -54,11 +54,26 @@ In fact, I'd like to keep it jailed in a way that it can't even see this flake o
 
 ## Network proxies and firewalls
 
+- local squid proxy in intercept mode
+- lan/intranet proxy
+
 ## Docker security
+
+- run rootless
+- managed network; segmentation
+- don't mount sensitive files, unix sockets (and never the docker daemon socket)
+- latest updates
+- `--security-opt=no-new-privileges`
+- dropping all privileges with `--cap-drop=all`, and only explicitly adding the capabilities you need using `--cap-add`
+- monitor logs regularly to look for issues and anomalies
 
 # Off-the-Shelf Solutions
 
 ## Claude Code Sandbox Mode
+
+pretty good option, especially on mac which doesn't have cgroups. configure carefully. uses cgroups and namespaces on linux, 'seatbelt' on mac. covers fs isolation, network filtering, process isolation, and logging and it's already built-in.
+
+[Claude Code Sandbox Mode](./docs/claude-code-sandbox-mode.md)
 
 ## OpenSandbox
 
@@ -68,15 +83,27 @@ In fact, I'd like to keep it jailed in a way that it can't even see this flake o
 
 # chroot jails
 
-# cgroups
+# namespaces and cgroups
+
+[Namespaces and cgroups](./docs/namespaces-and-cgroups.md)
 
 ## bubblewrap
 
+higher-level wrapper for configuring cgroups and namespaces.
+
 ## jail.nix
+
+even higher-level wrapper for bubblewrap, used to sandbox nix packages
 
 # Containerization
 
 ## docker/etc
+
+TODO: what kind of isolation does docker provide by default; what can be configured?
+uses the same kernel, does not shield from kernel-level exploits.
+container escapes.
+exfiltration from mounted filesystems.
+seccomp profiles.
 
 ## microvm and kata containers
 
@@ -89,3 +116,19 @@ In fact, I'd like to keep it jailed in a way that it can't even see this flake o
 # OpenSnitch
 
 # AppArmor/SELinux
+
+
+# Idea for mega-sandbox experiment:
+
+- unpriv user (in user namespace)
+- neuter npm
+- lock down agent config
+- lock down playwright config
+- holistic net proxy: network namespace (iptables) => squid netns (domains) => system
+- custom cgroup with resource limits and namespace isolation:
+    * using bwrap or jail.nix
+    * launch with custom chroot
+- use a seccomp profile to block dangerous syscalls
+- use gvisor to emulate kernel and block dangerous syscalls
+- use falco to monitor for dangerous effects
+- configure apparmor or selinux on the host system

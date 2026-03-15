@@ -1,9 +1,12 @@
-# cgroups
+# namespaces and cgroups
+
+this is secret sauce for managing/limiting resources and isolating groups of processes. this is what docker and other container runtimes use to achieve isolation from the host system, and many sandboxing solutions are built on top of this. if you have a basic understanding of how these features work, it will make it much easier to configure the various other sandboxing solutions more precisely, and to audit sandboxes to verify their exact configuration or make find-grained modifications.
+
+this mostly just applies to linux hosts, however, because cgroups and user namespaces are a feature of the linux kernel.
 
 VERDICT: use this because it lets you configure fine-grained resource controls and namespace isolation. an agent started in an isolated cgroup means all subprocesses started by the agent inherit the same configuration. you don't need to use this manually, there are a lot of systems and apps that wrap it. if you don't have systemd, you can use a wrapper like bubblewrap. the 2 off-the-shelf solutions, Claude Code Sandbox Mode and OpenSandbox use bubblewrap to implement their sandboxes.
 
-
-kernel-level feature that can control, limit, and audit resource usage for specific groups of processes. it can prioritize one group of processes over others. additionally, each cgroup uses namespace isolation, which sandboxes the process group (depending on how strictly you configure it). this is the underlying technology that powers containers and Docker. it is used by systemd to isolate kernel resources, system services, user processes, etc. into separate groups and cgroup settings can be configured directly through unit files managed by systemd.
+cgroups are a kernel-level feature that can control, limit, and audit resource usage for specific groups of processes. it can prioritize one group of processes over others. 
 
 - `cgroups` (control groups)
 - linux feature that limits, monitors, and isolates resource usage (cpu, mem, disk i/o, etc) of a collection of processes
@@ -202,6 +205,36 @@ example: `unshare --user --pid --map-root-user --mount-proc --fork chroot $HOME/
     * i think we can create a ns manually, then use `unshare --net=/path/to/ns/mount`?
     * or else you can run `nsenter` first, or use `ip ns exec -- unshare ... -- cmd`?
 
+- `veth`:
+    * virtual network devices that can tunnel between namespaces and connect to physical interfaces
+    * always created in interconnected pairs
+    * `ip link add <p1-name> type veth peer name <p2-name>`
+    * link two netns: `ip link add <p1-name> netns <p1-ns> type veth peer <p2-name> netns <p2-ns>`
+
+this appears to be how to bridge the netns with the system:
+```bash
+ip link add veth0 type veth peer name veth1 netns test_ns
+ip link set veth0 up
+ip netns exec test_ns ip link set veth1 up
+ip netns exec test_ns ip addr add 192.168.10.1/24 dev veth1
+ip addr add 192.168.10.2/24 dev veth0
+ip netns exec test_ns ip link set lo up
+ip link set lo up
+```
+then set the default gateway to allow network access:
+```bash
+ip netns exec test_ns ip route add default via 192.168.10.1
+ip netns exec test_ns ip route list
+```
+
+bridge multiple veth pairs with bridge:
+```bash
+ip link add br0 type bridge
+ip link set br0 up
+ip link set veth0 master br0
+ip netns exec test_ns ip link set veth1 master br0
+```
+
 # control group application examples
 
 ## prioritized db i/o
@@ -292,13 +325,66 @@ exit
 
 https://arianfm.medium.com/namespaces-and-cgroups-in-linux-197a4368bf18
 
-- [ ] start a program with unshare
+- [ ] create and configure a netns
+- [ ] start a program with unshare (network and some binds)
 - [ ] inspect the cgroup
-- [ ] enable network isolation
 - [ ] demo effect
 - [ ] configure firewall
 - [ ] demo effect
+- [ ] make a persistent netns
 
+```bash
+# TODO: try this again but use a unique subnet `192.160.2.x`
+
+sudo ip netns add ns1
+sudo ip netns list
+
+sudo ip netns exec ns1 ip link show
+#   shows only lo: DOWN
+
+sudo ip netns exec ns1 ip link set lo up
+
+sudo ip link add veth0 type veth peer name veth1 netns ns1
+
+# setup the system-side of the pair
+sudo ip link set veth0 up
+
+# setup the ns-side of the pair
+sudo ip netns exec ns1 ip link set veth1 up
+sudo ip netns exec ns1 ip addr add 192.168.1.123/24 dev veth1
+
+sudo ip netns exec ns1 ip link set lo up
+sudo ip link set lo up
+
+# set ns1 default route to veth0
+sudo ip netns exec ns1 ip route add default via 192.168.1.123
+
+# add an ip on the system namespace to bridge the connections.
+sudo ipaddr add 192.168.1.124/24 dev veth0
+
+# TODO: so far, this only lets me connect to host system but not the rest of the network or the internet.
+
+# check if ip-forwarding is enabled:
+sudo cat /proc/sys/net/ipv4/ip_forward
+#   1 = on
+#   0 = off
+
+# check default policy (probably ACCEPT)
+sudo ip netns exec ns1 iptables -L FORWARD
+# set default policy to DROP
+sudo ip netns exec ns1 iptables -P FORWARD DROP
+
+sudo iptables -t nat -L
+
+# TODO: continue from here https://www.gilesthomas.com/2021/03/fun-with-network-namespaces
+
+# TODO: persisting: create a file and use `unshare --net=file` to create the ns; unbind the mount point to delete it, configure it normally otherwise. 
+# or maybe you create it with unshare --net=file, configure it manually, then always use that same path when launching an app with unshare?
+```
+
+for agent sandboxing, i'm more interested in white-listing domains than managing iptables. however, this adds another layer of defense. you can use it to black-list/white-list ip ranges, or use it together with an iprep database to block potentially dangerous ips.
+
+TODO: idea for using squid: `agent ns (iptables) => squid ns (domains) => system network`
 
 ## with systemd-run
 
