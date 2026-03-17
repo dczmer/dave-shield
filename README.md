@@ -109,7 +109,11 @@ seccomp profiles.
 
 # gvisor
 
+intercepts syscalls and acts as a guest kernel.
+
 # seccomp
+
+use with apparmor/selinux: you may not be able to fully block a given syscall and have the app work, but you can put limits on use of that syscall with apparmor.
 
 # falco
 

@@ -61,7 +61,7 @@ cgroups are a kernel-level feature that can control, limit, and audit resource u
         + `pid namespace` groups can see processes in their own group, isolated from everything else
         + `network namespace` groups get their own interface controllers, iptables firewall, routing tables, etc.:
             + network namespaces can be connected using teh `veth` device
-        + `UTS namespace` the groups get their own hostname
+        + `UTS namespace` the groups get their own hostname (hide real hostname)
         + `mount namespace` you can mount directories into arbitrary paths in the cgroup environment to share only required directories, and also mount read-only directories
         + `ipc namespace` isolates the kernel IPC communication channels from the rest of the system
         + `user namespace` isolates the user ids (and group ids) between namespaces
@@ -69,7 +69,7 @@ cgroups are a kernel-level feature that can control, limit, and audit resource u
 - network namespace controls allow for tagging all packets from the group in a way they can be detected and managed by an external firewall as well
 - accounting features are usually disabled by default, but can be turned on for a sub-tree to see what resources a group is using
 - the `freezer` allows you to take a snapshot of a particular process and "move" it (like take a default process and move it to a specific cgroup)
-- facilities fine-grained performance tuning, along with `tuned` for your specific workloads
+- facilitates fine-grained performance tuning, along with `tuned` for your specific workloads
 - `systemd` service units start isolated under `system.slice` cgroup, user proceses under `user.slice`, and vm/container processes under `machine.slice`
 - run `systemd-cgls` to see the hierarchy of active groups
 
@@ -77,7 +77,7 @@ cgroups are a kernel-level feature that can control, limit, and audit resource u
 - managing cgroups with `cpushares`:
     * cpushares (`cpu.shares`):
         + provides tasks in a group with a relative amount of CPU time (`cpu.shares`)
-        + cpu time is determined by dividing the cgroup's CPUShares value by the total number of defined CPUShares on the system
+        + cpu time is determined by dividing the cgroup's CPUShares value by the total number of defined CPUShares on the system.
 
 
 - managing cgroups without any tooling:
@@ -293,6 +293,7 @@ ls /sys/fs/cgroup/example
 # use ctrl+d or `exit` to drop back to unprivileged shell as soon as you are done
 sudo su -
 echo 1,2 > /sys/fs/cgroup/example/cpuset.cpus
+# ctrl+d
 ```
 
 ```bash
@@ -321,7 +322,7 @@ nproc
 exit
 ```
 
-## manual namespaces with cgroups using unshare
+## manual namespaces using unshare
 
 https://arianfm.medium.com/namespaces-and-cgroups-in-linux-197a4368bf18
 
@@ -334,8 +335,6 @@ https://arianfm.medium.com/namespaces-and-cgroups-in-linux-197a4368bf18
 - [ ] make a persistent netns
 
 ```bash
-# TODO: try this again but use a unique subnet `192.160.2.x`
-
 sudo ip netns add ns1
 sudo ip netns list
 
@@ -351,35 +350,49 @@ sudo ip link set veth0 up
 
 # setup the ns-side of the pair
 sudo ip netns exec ns1 ip link set veth1 up
-sudo ip netns exec ns1 ip addr add 192.168.1.123/24 dev veth1
+sudo ip netns exec ns1 ip addr add 192.168.2.1/24 dev veth1
 
 sudo ip netns exec ns1 ip link set lo up
-sudo ip link set lo up
 
 # set ns1 default route to veth0
-sudo ip netns exec ns1 ip route add default via 192.168.1.123
+sudo ip netns exec ns1 ip route add default via 192.168.2.2
 
 # add an ip on the system namespace to bridge the connections.
-sudo ipaddr add 192.168.1.124/24 dev veth0
+sudo ipaddr add 192.168.2.2/24 dev veth0
 
-# TODO: so far, this only lets me connect to host system but not the rest of the network or the internet.
+# so far, this only lets me connect to host system but not the rest of the network or the internet.
 
 # check if ip-forwarding is enabled:
 sudo cat /proc/sys/net/ipv4/ip_forward
 #   1 = on
 #   0 = off
+#   if not, `sudo echo 1 > /proc/sys/net/ipv4/ip_forward`
+
+# at this point, I can ping to/from the ns and the host network, but not beyond that.
 
 # check default policy (probably ACCEPT)
 sudo ip netns exec ns1 iptables -L FORWARD
 # set default policy to DROP
 sudo ip netns exec ns1 iptables -P FORWARD DROP
 
+# check nat rules
 sudo iptables -t nat -L
 
-# TODO: continue from here https://www.gilesthomas.com/2021/03/fun-with-network-namespaces
+# replace wlp0s20f3 with your actual device name
+sudo iptables -t nat -A POSTROUTING -s 192.168.2.0/255.255.255.0 -o wlp0s20f3 -j MASQUERADE
+sudo iptables -A FORWARD -i wlp0s20f3 -o veth0 -j ACCEPT
+sudo iptables -A FORWARD -o wlp0s20f3 -i veth0 -j ACCEPT
 
-# TODO: persisting: create a file and use `unshare --net=file` to create the ns; unbind the mount point to delete it, configure it normally otherwise. 
-# or maybe you create it with unshare --net=file, configure it manually, then always use that same path when launching an app with unshare?
+# if it all worked, should be able to ping outside of the network now
+
+# TODO:
+# now say you have a service on port 8888 in ns1 and you want it to be reachable from outside
+sudo iptables -t nat -A PREROUTING -p tcp -i wlp0s20f3 --dport 8888 -j DNAT --to-destination 192.168.2.1:8888
+sudo iptables -A FORWARD -p tcp -d 192.168.2.1 --dport 8888 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+
+# TODO: persisting namespaces and cgroup
+# run `unshare` with on of the `--namespace[=file]` arguments, like `--net`, or `--cgroup`.
+# the namespace will be mounted to that file location so you can re-use it.
 ```
 
 for agent sandboxing, i'm more interested in white-listing domains than managing iptables. however, this adds another layer of defense. you can use it to black-list/white-list ip ranges, or use it together with an iprep database to block potentially dangerous ips.
