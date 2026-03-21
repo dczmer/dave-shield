@@ -326,7 +326,7 @@ exit
 
 https://arianfm.medium.com/namespaces-and-cgroups-in-linux-197a4368bf18
 
-- [ ] create and configure a netns
+- [x] create and configure a netns
 - [ ] start a program with unshare (network and some binds)
 - [ ] inspect the cgroup
 - [ ] demo effect
@@ -337,26 +337,19 @@ https://arianfm.medium.com/namespaces-and-cgroups-in-linux-197a4368bf18
 ```bash
 sudo ip netns add ns1
 sudo ip netns list
-
 sudo ip netns exec ns1 ip link show
 #   shows only lo: DOWN
-
 sudo ip netns exec ns1 ip link set lo up
 
 sudo ip link add veth0 type veth peer name veth1 netns ns1
-
 # setup the system-side of the pair
 sudo ip link set veth0 up
-
 # setup the ns-side of the pair
 sudo ip netns exec ns1 ip link set veth1 up
 sudo ip netns exec ns1 ip addr add 192.168.2.1/24 dev veth1
 
-sudo ip netns exec ns1 ip link set lo up
-
 # set ns1 default route to veth0
 sudo ip netns exec ns1 ip route add default via 192.168.2.2
-
 # add an ip on the system namespace to bridge the connections.
 sudo ipaddr add 192.168.2.2/24 dev veth0
 
@@ -377,7 +370,6 @@ sudo ip netns exec ns1 iptables -P FORWARD DROP
 
 # check nat rules
 sudo iptables -t nat -L
-
 # replace wlp0s20f3 with your actual device name
 sudo iptables -t nat -A POSTROUTING -s 192.168.2.0/255.255.255.0 -o wlp0s20f3 -j MASQUERADE
 sudo iptables -A FORWARD -i wlp0s20f3 -o veth0 -j ACCEPT
@@ -389,22 +381,56 @@ sudo iptables -A FORWARD -o wlp0s20f3 -i veth0 -j ACCEPT
 # now say you have a service on port 8888 in ns1 and you want it to be reachable from outside
 sudo iptables -t nat -A PREROUTING -p tcp -i wlp0s20f3 --dport 8888 -j DNAT --to-destination 192.168.2.1:8888
 sudo iptables -A FORWARD -p tcp -d 192.168.2.1 --dport 8888 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+```
 
-# TODO: persisting namespaces and cgroup
-# run `unshare` with on of the `--namespace[=file]` arguments, like `--net`, or `--cgroup`.
-# the namespace will be mounted to that file location so you can re-use it.
+TODO: persisting namespaces and cgroup
+run `unshare` with on of the `--namespace[=file]` arguments, like `--net`, or `--cgroup`.
+the namespace will be mounted to that file location so you can re-use it.
+
+```bash
+ROOT=/tmp/testroot
+# NOTE: mount file must be in /var/run/netns to use `ip netns` and `unshare`
+NETNS=/var/run/netnts/daveshield-ns
+
+# TODO: i don't actually know how to manage a mount ns...
+mkdir -p "$ROOT"/{chroot,namespaces}
+# TODO: why binding a dir to itself? did i get this wrong?
+# - mounting a path to itself is just a way to meet the requirement of being a
+#   'mount point' for later use.
+mount --bind "$ROOT"/namespaces "$ROOT"/namespaces
+mount --make-private "$ROOT"/namespaces
+touch "$ROOT"/namespaces/mnt
+
+# https://unix.stackexchange.com/questions/456620/how-to-perform-chroot-with-linux-namespaces
+unshare --mount="$ROOT"/namespaces/mnt -- bash
+cd "$ROOT"/
+
+touch "$NETNS"
+unshare --net="$NETNS" -- ip netns list
+# setup net ns, nat, and firewall
+
+# TODO move other ns files under "$ROOT"/namespaces
+
+touch "$ROOT"/uts-ns
+unshare --uts="$ROOT"/uts-ns hostname SANDBOX
+
+# TODO: not sure how the cgroup binding works
+touch "$ROOT"/cgroup
+
+unshare \
+    --user \
+    --ipc \
+    --uts="$ROOT"/uts-ns \
+    --net="$NETNS" \
+    --cgroup="$ROOT"/cgroup \
+    --mount="$ROOT"/namespaces/mnt
+    --pid --fork --mount-proc \
+    /run/current-system/sw/bin/bash 
 ```
 
 for agent sandboxing, i'm more interested in white-listing domains than managing iptables. however, this adds another layer of defense. you can use it to black-list/white-list ip ranges, or use it together with an iprep database to block potentially dangerous ips.
 
 TODO: idea for using squid: `agent ns (iptables) => squid ns (domains) => system network`
-
-## with systemd-run
-
-- use systemd-run to start a service with specific config
-- inspect it
-- modify it
-- make it persistent
 
 ## use it to run an isolated agent
 

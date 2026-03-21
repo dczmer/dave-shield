@@ -4,8 +4,6 @@ Research and implementation of isolated and sandboxing solutions and techniques 
 
 ## Objective
 
-My initial objective was to create a sandboxed environment to run AI agents. The agent should be locked in a jail and only allowed to interact with the system and network in a tightly managed way, using a white-list only approach to resources like network and file-system. It should be isolated from other processes and `setuid` binaries. It should also keep audit logs that can be reviewed for unexpected access, or to tell me which resources need to white-list when legitimate access is blocked.
-
 - Agent is locked down to minimum access that it needs:
     * Process:
         + Shell commands run as unprivileged user, in a jail where it can only see the tools it's been given
@@ -27,21 +25,19 @@ My initial objective was to create a sandboxed environment to run AI agents. The
         + Audit logs to review access and violations
         + Debug blocking of legitimate access
 
-In fact, I'd like to keep it jailed in a way that it can't even see this flake or any of the scripts or files used to configure it's environment.
-
 # General Suggestions
 
 ## Run as restricted user
 
 * Restricted user:
     + no sudo access
+    + member of only to single-purpose group
     + never run docker (or anything) as root
 
 ## Package Managers (NPM, etc)
 
-* NPM:
-    + disable post-install scripts
-    + disable all network access in the environment where the agent runs, have another way of running as a privileged user to install/update packages.
++ disable post-install scripts (NPM)
++ disable network/registry access in the environment where the agent runs, have another way of running to manually install/update packages.
 
 ## Agent/MCP Configuration
 
@@ -54,8 +50,8 @@ In fact, I'd like to keep it jailed in a way that it can't even see this flake o
 
 ## Network proxies and firewalls
 
-- local squid proxy in intercept mode
-- lan/intranet proxy
+- network proxies with domain filtering, like squid
+- use network segmentation and firewall
 
 ## Docker security
 
@@ -73,11 +69,23 @@ In fact, I'd like to keep it jailed in a way that it can't even see this flake o
 
 pretty good option, especially on mac which doesn't have cgroups. configure carefully. uses cgroups and namespaces on linux, 'seatbelt' on mac. covers fs isolation, network filtering, process isolation, and logging and it's already built-in.
 
+but this sandbox wasn't designed as a jail, it was actually designed as a _convenience_ feature to reduce "prompt fatigue". In a restricted environment, you can feel a little more comfortable auto-accepting things and letting Claude run without supervision. so i don't consider this a complete solution, but it's worth using if you are on Mac.
+
 [Claude Code Sandbox Mode](./docs/claude-code-sandbox-mode.md)
+
+The biggest issue I found is that the IPC isolation on the Mac sandbox prevents you from launching chromium or firefox via playwright. I'd like to be able to use those tools and just lock them down manually with allow-lists.
+
+My other frustration is that Claude keeps rewriting its own config file and changing sandbox options. Even when I denied writing to the settings file via tool permissions and sandbox deny list. I think it might be a bug, but it looks suspiciously like its making the sandbox less restrictive.
 
 ## OpenSandbox
 
 ## Firejail
+
+Sandbox solution for isolating and restricting applications using namespaces. Use a pre-defined 'profile' for the app you want to run rather than setting options manually. Has generic, general purpose profiles with different isolation levels, and app-specific profiles that are more precise.
+
+Also allows you to apply seccomp filters with your profile.
+
+Can generate a AppArmor profile for you to use.
 
 # Virtual Machines
 
@@ -90,6 +98,8 @@ pretty good option, especially on mac which doesn't have cgroups. configure care
 ## bubblewrap
 
 higher-level wrapper for configuring cgroups and namespaces.
+a wrapper for a _subset_ of user namespaces, focused on preventing privilege escalation.
+docs say it doesn't support changing iptables on the network namespace.
 
 ## jail.nix
 
