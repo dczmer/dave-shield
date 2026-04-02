@@ -20,7 +20,7 @@
           inherit system;
           config.allowUnfree = true;
         };
-        jailed-agents = import ./packages/agent-jail.nix {
+        jailed-agents = import ./packages/agent-jail {
           inherit
             pkgs
             system
@@ -31,20 +31,18 @@
       in
       {
         apps = {
-          # non-sandboxed apps from llm-agents, updated daily.
-          claude-code-daily = {
-            type = "app";
-            program = "${llm-agents.packages.${system}.claude-code}/bin/claude";
-          };
-          claude-code-jailed = {
-            type = "app";
-            program = "${jailed-agents.packages.${system}.jailed-claude-code}/bin/claude";
-          };
           opencode-daily = {
             type = "app";
-            program = "${llm-agents.packages.${system}.opencode}/bin/opencode";
+            program = "${llm-agents.packages.opencode}/bin/opencode";
           };
-          # TODO: opencode-jailed
+          jailed-opencode-daily = {
+            type = "app";
+            program = "${jailed-agents.packages.jailed-opencode}/bin/jailed-opencode";
+          };
+          jailed-shell = {
+            type = "app";
+            program = "${jailed-agents.packages.jailed-shell}/bin/jailed-shell";
+          };
         };
       }
     );
