@@ -42,15 +42,19 @@
       "head *": "allow",
       "tail *": "allow",
       "touch *": "allow",
-      "gh issue view*": "allow",
-      "gh issue list*": "allow",
-      "git status*": "allow",
-      "git add*": "allow",
-      "git diff*": "allow",
-      "git log*": "allow",
-      "git show*": "allow",
-      "git checkout -b *": "allow",
-      "nix run .*": "allow"
+      "mkdir *": "allow",
+      "gh issue view *": "allow",
+      "gh issue list *": "allow",
+      "git status *": "allow",
+      "git add *": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "git rev-parse *": "allow",
+      "git show *": "allow",
+      "git checkout *": "allow",
+      "nix run .*": "allow",
+      "luacheck *": "allow",
+      "stylua": "allow"
     },
     "task": {
       "*": "allow"

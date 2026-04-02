@@ -60,7 +60,7 @@ let
 in
 {
   lib = {
-    inherit makeJailedOpenCode;
+    inherit makeJailedOpenCode makeJailedShell;
   };
   packages = {
     jailed-opencode = (makeJailedOpenCode { });

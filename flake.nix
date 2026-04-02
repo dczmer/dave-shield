@@ -33,7 +33,7 @@
         apps = {
           opencode-daily = {
             type = "app";
-            program = "${llm-agents.packages.opencode}/bin/opencode";
+            program = "${llm-agents.packages.${system}.opencode}/bin/opencode";
           };
           jailed-opencode-daily = {
             type = "app";
