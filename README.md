@@ -52,7 +52,7 @@ I use it in a devShell like this:
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    dave-shield.url = "git+file:///home/dave/source/dave-shield";
+    dave-shield.url = "github:dczmer/dave-shield";
   };
   outputs =
     {
