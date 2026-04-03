@@ -13,6 +13,7 @@ Research and implementation of isolated and sandboxing solutions and techniques 
         + R/W to project dir.
         + R/W to agent's manged dirs (config, state, etc).
         + R/O binding support.
+        + `tempfs` tmp dir.
         + Should not be able to see anything I don't explicitly bind.
     * Network:
         + Localhost (socket files are still dangerous, as are other exposed localhost services)
@@ -24,6 +25,72 @@ Research and implementation of isolated and sandboxing solutions and techniques 
     * Logging:
         + Audit logs to review access and violations
         + Debug blocking of legitimate access
+
+# Packages What I Made
+
+## agent-jail (opencode + jail.nix)
+
+I'm using this to run opencode with relaxed permissions configuration, to allow agents to run without having to constantly babysit prompts.
+
+Pros:
+- Nicely sandboxed: PIDs, IPC, users, filesystem.
+- Network can be disabled (either _completely_ off, or use system network)
+- Can _ONLY_ access the executables and packages provided by the nix derivation (call with `extraPkgs` to configure).
+- Uses `bubblewrap`, a subset of Linux Namespaces that hardens against `setuid` privilege escalation.
+- Nix!
+
+Cons:
+- No custom network namespace or iptables
+- No HTTP proxy
+- No kernel protection, like gVisor (but could use with SELinux or AppArmor)
+- No audit or alerts for violations
+
+I use it in a devShell like this:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+    dave-shield.url = "git+file:///home/dave/source/dave-shield";
+  };
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      dave-shield,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+        myPackages = with pkgs; [
+            git
+            uv
+            playwright
+        ];
+        jailedOpenCode = dave-shield.lib.${system}.makeJailedOpenCode {
+          extraPkgs = myPackages;
+        };
+        # use the shell to explore and test the sand-boxed environment
+        jailedShell = dave-shield.lib.${system}.makeJailedShell {
+          extraPkgs = myPackages;
+        };
+      in
+      {
+        devShells.default = pkgs.mkShell {
+          buildInputs =
+            with pkgs;
+            [
+              jailedOpenCode
+              jailedShell
+            ];
+        };
+      }
+    );
+}
+```
 
 # General Suggestions
 
@@ -67,15 +134,25 @@ Research and implementation of isolated and sandboxing solutions and techniques 
 
 ## Claude Code Sandbox Mode
 
+Pros:
+- Built-in.
+- Isolated filesystem.
+- HTTP proxy.
+- Sandbox settings apply to all processes launched by the agent.
+- Works on Linux (`bubblewrap`), and also on Mac (`seatbelt`).
+
+Cons:
+- Claude can just choose to bypass, unless you add extra configuration to prevent that.
+- No kernel or `setuid` protection.
+- Not isolated from the other applications and commands on the system.
+- Can't really configure it. Or I don't care enough about Mac to learn about `seatbelt`.
+- On Mac, you can't launch headless web browsers because they all depend on an IPC protocol that is blocked, and not configurable.
+
 pretty good option, especially on mac which doesn't have cgroups. configure carefully. uses cgroups and namespaces on linux, 'seatbelt' on mac. covers fs isolation, network filtering, process isolation, and logging and it's already built-in.
 
 but this sandbox wasn't designed as a jail, it was actually designed as a _convenience_ feature to reduce "prompt fatigue". In a restricted environment, you can feel a little more comfortable auto-accepting things and letting Claude run without supervision. so i don't consider this a complete solution, but it's worth using if you are on Mac.
 
-[Claude Code Sandbox Mode](./docs/claude-code-sandbox-mode.md)
-
 The biggest issue I found is that the IPC isolation on the Mac sandbox prevents you from launching chromium or firefox via playwright. I'd like to be able to use those tools and just lock them down manually with allow-lists.
-
-My other frustration is that Claude keeps rewriting its own config file and changing sandbox options. Even when I denied writing to the settings file via tool permissions and sandbox deny list. I think it might be a bug, but it looks suspiciously like its making the sandbox less restrictive.
 
 ## OpenSandbox
 
@@ -109,7 +186,7 @@ even higher-level wrapper for bubblewrap, used to sandbox nix packages
 
 ## docker/etc
 
-TODO: what kind of isolation does docker provide by default; what can be configured?
+TODO: exactly what kind of isolation does docker provide by default? what can be configured?
 uses the same kernel, does not shield from kernel-level exploits.
 container escapes.
 exfiltration from mounted filesystems.

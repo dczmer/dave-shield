@@ -30,6 +30,10 @@
         };
       in
       {
+        lib = with jailed-agents.lib; {
+          makeJailedOpenCode = makeJailedOpenCode;
+          makeJailedShell = makeJailedShell;
+        };
         apps = {
           opencode-daily = {
             type = "app";
