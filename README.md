@@ -160,9 +160,9 @@ The biggest issue I found is that the IPC isolation on the Mac sandbox prevents 
 
 Sandbox solution for isolating and restricting applications using namespaces. Use a pre-defined 'profile' for the app you want to run rather than setting options manually. Has generic, general purpose profiles with different isolation levels, and app-specific profiles that are more precise.
 
-Also allows you to apply seccomp filters with your profile.
+Also allows you to apply `seccomp` filters with your profile to block dangerous syscalls.
 
-Can generate a AppArmor profile for you to use.
+Can generate a `AppArmor` profile for you to use for kernel-level protection.
 
 # Virtual Machines
 
@@ -170,7 +170,9 @@ Can generate a AppArmor profile for you to use.
 
 # namespaces and cgroups
 
-[Namespaces and cgroups](./docs/namespaces-and-cgroups.md)
+## cgroups
+
+## linux namespaces
 
 ## bubblewrap
 
@@ -194,6 +196,8 @@ seccomp profiles.
 
 ## microvm and kata containers
 
+fast, lightweight container runtime.
+
 # gvisor
 
 intercepts syscalls and acts as a guest kernel.
@@ -202,24 +206,4 @@ intercepts syscalls and acts as a guest kernel.
 
 use with apparmor/selinux: you may not be able to fully block a given syscall and have the app work, but you can put limits on use of that syscall with apparmor.
 
-# falco
-
-# OpenSnitch
-
 # AppArmor/SELinux
-
-
-# Idea for mega-sandbox experiment:
-
-- unpriv user (in user namespace)
-- neuter npm
-- lock down agent config
-- lock down playwright config
-- holistic net proxy: network namespace (iptables) => squid netns (domains) => system
-- custom cgroup with resource limits and namespace isolation:
-    * using bwrap or jail.nix
-    * launch with custom chroot
-- use a seccomp profile to block dangerous syscalls
-- use gvisor to emulate kernel and block dangerous syscalls
-- use falco to monitor for dangerous effects
-- configure apparmor or selinux on the host system
