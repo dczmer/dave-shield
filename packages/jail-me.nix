@@ -27,6 +27,7 @@
         gnutar
         diffutils
         coreutils
+        tree
       ];
       networkCombinator =
         if hostNetwork then
