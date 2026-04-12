@@ -28,6 +28,10 @@
         diffutils
         coreutils
         tree
+        file
+        wget
+        vim
+        gnused
       ];
       networkCombinator =
         if hostNetwork then
@@ -53,6 +57,7 @@
             # add these pkgs bin/ directories to $path
             (add-pkg-deps commonPkgs)
             (add-pkg-deps extraPkgs)
+            (set-env "EDITOR" "vim")
           ]
           ++ networkCombinator
         );
