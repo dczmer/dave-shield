@@ -4,6 +4,10 @@
     flake-utils.url = "github:numtide/flake-utils";
     jail-nix.url = "sourcehut:~alexdavid/jail.nix";
     llm-agents.url = "github:numtide/llm-agents.nix";
+    skill-issues-src = {
+      url = "github:dczmer/skill-issues";
+      flake = false;
+    };
   };
   outputs =
     {
@@ -11,6 +15,7 @@
       flake-utils,
       jail-nix,
       llm-agents,
+      skill-issues-src,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
@@ -31,7 +36,7 @@
         };
         # agents
         jailedOpenCode = pkgs.callPackage ./packages/opencode {
-          inherit jail daveShield;
+          inherit jail daveShield skill-issues-src;
         };
       in
       {

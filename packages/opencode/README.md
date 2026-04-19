@@ -104,6 +104,35 @@ But if you use a symlink, then the sandboxed environment needs to be able to acc
 makeJailedOpenCode { extraDirs = [ "~/source/skill-issues" ]
 ```
 
+## Alternative: flake input + `try-ro-bind` to install skill folders
+
+```nix
+skill-issues-src = {
+  url = "github:dczmer/skill-issues";
+  flake = false;
+};
+```
+
+```nix
+# build the skill-issues derivation
+skillIssues = stdenv.mkDerivation {
+  name = "skill-issues";
+  version = "0.1";
+  src = skill-issues-src;
+  dontConfigure = true;
+  dontBuild = true;
+  dontStrip = true;
+  installPhase = ''
+    mkdir -p $out
+    cp -r ./agents ./skills $out
+  '';
+};
+
+# bind skill-issues agents and skill files
+(try-ro-bind "${skillIssues}" (noescape "~/.config/opencode/skills/skill-issues"))
+(try-ro-bind "${skillIssues}/agents" (noescape "~/.config/opencode/agents/skill-issues"))
+```
+
 # RTK
 
 `rtk` is included as a default package but you have to configure it yourself.
@@ -114,14 +143,22 @@ nix-shell -p rtk
 rtk -g --opencode
 ```
 
-# Global AGENTS.md
+If `rtk` is not installed, it will show a warning message at startup and then it won't try to use it again.
 
-> TODO: config option to opt-out of the managed rules file to prevent clobbering your own file.
+# Global AGENTS.md
 
 The included `AGENTS.md` will be bind-mounted "read-only" to `~/.config/opencode/AGENTS.md` inside of the sandbox environment, which means it will overwrite any existing file.
 
+# Lessons and Observations
+
+1. OpenCode custom agents are pretty cool, especially with 'primary' agents. Provides much more than a Claude agent.
+2. OpenCode installs things with `bun` into your `~/.config` directory when it starts up, which makes it difficult to package and manage a config directory with `nix` :(
+3. OpenCode constantly prunes your context window. This helps keep your context usage lower but completely invalidates the benefit of kv caching that can actually cause excess token-burn.
+4. OpenCode doesn't make it easy 'bundle' collections of subagents and skills as a single unit. You have to make a symlink for each folder individually.
+5. You can use `jail.nix` to bind-mount files into `~/.config/opencode` in order to manage config, AGENTS.md, custom subagents and skills. This effectively gets around the other issues but is more complicated.
+
 # TODO
 
+- some way to manage uv/node so the agent can't install packages but i can
 - some kind of network proxy/filter to block or monitor outgoing web requests
 - opencode-mem: https://github.com/tickernelz/opencode-mem
-- some way to manage uv/node so the agent can't install packages but i can

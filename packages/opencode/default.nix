@@ -2,12 +2,25 @@
   llm-agents,
   jail,
   daveShield,
+  skill-issues-src,
   rtk,
   stdenv,
   symlinkJoin,
   makeWrapper,
 }:
 let
+  skillIssues = stdenv.mkDerivation {
+    name = "skill-issues";
+    version = "0.1";
+    src = skill-issues-src;
+    dontConfigure = true;
+    dontBuild = true;
+    dontStrip = true;
+    installPhase = ''
+      mkdir -p $out
+      cp -r ./agents ./skills $out
+    '';
+  };
   configDir = stdenv.mkDerivation {
     name = "Jailed Opencode Config";
     version = "0.1";
@@ -31,14 +44,16 @@ let
     (readwrite (noescape "~/.local/state/opencode"))
     # bind the managed AGENTS.md file into the sandbox environment.
     (ro-bind "${configDir}/config/AGENTS.md" (noescape "~/.config/opencode/AGENTS.md"))
-    # bind my personal skills repo, only if it exists
-    (try-readonly (noescape "~/source/skill-issues"))
+    # bind skill-issues agents and skill files
+    (try-ro-bind "${skillIssues}" (noescape "~/.config/opencode/skills/skill-issues"))
+    (try-ro-bind "${skillIssues}/agents" (noescape "~/.config/opencode/agents/skill-issues"))
   ];
   wrappedOpenCode = symlinkJoin {
     name = "opencode";
     paths = [
       llm-agents.opencode
       configDir
+      skillIssues
     ];
     buildInputs = [ makeWrapper ];
     postBuild = ''
