@@ -42,6 +42,8 @@
           jailMeLib = jailMeLib;
           # use the same combinators from the version this flake is using:
           jailCombinators = jail.combinators;
+          #
+          makeJailedOpenCode = jailedOpenCode.lib.makeJailedOpenCode;
         };
         packages = {
           # example use of daveShield interface:
