@@ -3,12 +3,14 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     jail-nix.url = "sourcehut:~alexdavid/jail.nix";
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
   outputs =
     {
       nixpkgs,
       flake-utils,
       jail-nix,
+      llm-agents,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
@@ -17,13 +19,19 @@
         pkgs = import nixpkgs {
           inherit system;
           config.allowUnfree = true;
+          overlays = [ llm-agents.overlays.default ];
         };
+        # jail-me library
         jail = jail-nix.lib.init pkgs;
         jailMeLib = import ./packages/jail-me.nix {
           inherit pkgs jail;
         };
         daveShield = jailMeLib.init {
           name = "dave-shield";
+        };
+        # applications
+        jailedOpenCode = pkgs.callPackage ./packages/opencode {
+          inherit jail daveShield;
         };
       in
       {
@@ -52,6 +60,17 @@
                 ${entry}
                 echo 'Cleaning up...'
               ''))
+            ];
+          };
+          jailedOpenCode = jailedOpenCode.packages.jailedOpenCode;
+          wrappedOpenCode = jailedOpenCode.packages.wrappedOpenCode;
+        };
+        devShells = {
+          default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              uv
+              nodejs
+              prettierd
             ];
           };
         };
