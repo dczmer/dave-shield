@@ -44,7 +44,8 @@
       "git checkout *": "allow",
       "nix run .*": "allow",
       "luacheck *": "allow",
-      "stylua *": "allow"
+      "stylua *": "allow",
+      "rtk *": "allow"
     },
     "task": {
       "*": "allow"

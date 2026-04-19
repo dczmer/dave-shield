@@ -31,6 +31,8 @@ let
     (readwrite (noescape "~/.local/state/opencode"))
     # bind the managed AGENTS.md file into the sandbox environment.
     (ro-bind "${configDir}/config/AGENTS.md" (noescape "~/.config/opencode/AGENTS.md"))
+    # bind my personal skills repo, only if it exists
+    (try-readonly (noescape "~/source/skill-issues"))
   ];
   wrappedOpenCode = symlinkJoin {
     name = "opencode";

@@ -122,5 +122,6 @@ The included `AGENTS.md` will be bind-mounted "read-only" to `~/.config/opencode
 
 # TODO
 
-- un-jailed version with same packages and configs (but will pick up paths and executables from the host environment like normal).
+- some kind of network proxy/filter to block or monitor outgoing web requests
 - opencode-mem: https://github.com/tickernelz/opencode-mem
+- some way to manage uv/node so the agent can't install packages but i can
