@@ -81,6 +81,6 @@ in
     makeJailedOpenCode = makeJailedOpenCode;
   };
   packages = {
-    jailedOpenCode = makeJailedOpenCode { extraDirs = [ "~/source/skill-issues/" ]; };
+    jailedOpenCode = makeJailedOpenCode { };
   };
 }
