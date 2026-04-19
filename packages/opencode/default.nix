@@ -63,7 +63,7 @@ let
       extraCombinators ? [ ],
     }:
     daveShield {
-      exec = llm-agents.opencode;
+      exec = wrappedOpenCode;
       extraPkgs = extraPkgs ++ openCodeExtraPkgs;
       extraCombinators = extraCombinators ++ openCodeExtraCombinators;
     };
@@ -73,8 +73,6 @@ in
     makeJailedOpenCode = makeJailedOpenCode;
   };
   packages = {
-    jailedOpenCode = daveShield {
-      exec = wrappedOpenCode;
-    };
+    jailedOpenCode = makeJailedOpenCode { };
   };
 }
