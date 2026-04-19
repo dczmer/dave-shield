@@ -123,5 +123,4 @@ The included `AGENTS.md` will be bind-mounted "read-only" to `~/.config/opencode
 # TODO
 
 - un-jailed version with same packages and configs (but will pick up paths and executables from the host environment like normal).
-- opencode-mem
-- superpowers
+- opencode-mem: https://github.com/tickernelz/opencode-mem

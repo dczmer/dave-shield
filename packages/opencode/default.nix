@@ -29,6 +29,7 @@ let
     (readwrite (noescape "~/.config/opencode"))
     (readwrite (noescape "~/.local/share/opencode"))
     (readwrite (noescape "~/.local/state/opencode"))
+    # bind the managed AGENTS.md file into the sandbox environment.
     (ro-bind "${configDir}/config/AGENTS.md" (noescape "~/.config/opencode/AGENTS.md"))
   ];
   wrappedOpenCode = symlinkJoin {
@@ -68,5 +69,6 @@ in
   };
   packages = {
     jailedOpenCode = makeJailedOpenCode { };
+    unjailedOpenCode = wrappedOpenCode;
   };
 }

@@ -29,7 +29,7 @@
         daveShield = jailMeLib.init {
           name = "dave-shield";
         };
-        # applications
+        # agents
         jailedOpenCode = pkgs.callPackage ./packages/opencode {
           inherit jail daveShield;
         };
@@ -42,7 +42,7 @@
           jailMeLib = jailMeLib;
           # use the same combinators from the version this flake is using:
           jailCombinators = jail.combinators;
-          #
+          # create a customized sandbox for opencode
           makeJailedOpenCode = jailedOpenCode.lib.makeJailedOpenCode;
         };
         packages = {
@@ -64,8 +64,9 @@
               ''))
             ];
           };
+          # OpenCode
           jailedOpenCode = jailedOpenCode.packages.jailedOpenCode;
-          wrappedOpenCode = jailedOpenCode.packages.wrappedOpenCode;
+          unjailedOpenCode = jailedOpenCode.packages.unjailedOpenCode;
         };
         devShells = {
           default = pkgs.mkShell {
