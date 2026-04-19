@@ -1,18 +1,3 @@
-# TODO:
-# - un-jailed version
-# - document managing config files:
-#   - `OPENCODE_CONFIG_DIR` will override/overlay ~/.config/opencode
-#   - project-local opencode.json, .opencode dirs override those
-#   - recommend: use `"*": "ask"` in main config, jailed config locks things down, per-project config makes adjustments as needed
-#
-# :( i think we have to manage these things manually:
-# - how to make it pick up my custom skills and agents w/out write access to the store?
-# - skill-issues:
-#   - need to add ro bind to skill-issues repo
-# - rtk
-# - caveman
-# - opencode-mem
-# - superpowers
 {
   llm-agents,
   jail,
@@ -23,16 +8,6 @@
   makeWrapper,
 }:
 let
-  openCodeExtraPkgs = [
-    rtk
-  ];
-  openCodeExtraCombinators = with jail.combinators; [
-    # share the opencode config from my home dir.
-    # otherwise, you have to configure and auth in each new sandbox environment.
-    (readwrite (noescape "~/.config/opencode"))
-    (readwrite (noescape "~/.local/share/opencode"))
-    (readwrite (noescape "~/.local/state/opencode"))
-  ];
   configDir = stdenv.mkDerivation {
     name = "Jailed Opencode Config";
     version = "0.1";
@@ -45,6 +20,17 @@ let
       cp -rv ./* $out/config
     '';
   };
+  openCodeExtraPkgs = [
+    rtk
+  ];
+  openCodeExtraCombinators = with jail.combinators; [
+    # share the opencode config from my home dir.
+    # otherwise, you have to configure and auth in each new sandbox environment.
+    (readwrite (noescape "~/.config/opencode"))
+    (readwrite (noescape "~/.local/share/opencode"))
+    (readwrite (noescape "~/.local/state/opencode"))
+    (ro-bind "${configDir}/config/AGENTS.md" (noescape "~/.config/opencode/AGENTS.md"))
+  ];
   wrappedOpenCode = symlinkJoin {
     name = "opencode";
     paths = [

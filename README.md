@@ -131,6 +131,9 @@ myShield = dave-shield.lib.${system}.jailMeLib.init {
 };
 jailedShell = myShield { exec = pkgs.bash; };
 ```
+## Jailed OpenCode
+
+[Personal OpenCode config using daveShield](./packages/opencode/README.md).
 
 ## dave-opensandbox
 
