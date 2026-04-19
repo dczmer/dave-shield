@@ -7,8 +7,12 @@
 #
 # :( i think we have to manage these things manually:
 # - how to make it pick up my custom skills and agents w/out write access to the store?
-# - skill-issues
-# - rtk, caveman, opencode-mem, superpowers
+# - skill-issues:
+#   - need to add ro bind to skill-issues repo
+# - rtk
+# - caveman
+# - opencode-mem
+# - superpowers
 {
   llm-agents,
   jail,
@@ -60,12 +64,16 @@ let
   makeJailedOpenCode =
     {
       extraPkgs ? [ ],
+      extraDirs ? [ ],
       extraCombinators ? [ ],
     }:
     daveShield {
       exec = wrappedOpenCode;
       extraPkgs = extraPkgs ++ openCodeExtraPkgs;
-      extraCombinators = extraCombinators ++ openCodeExtraCombinators;
+      extraCombinators =
+        extraCombinators
+        ++ openCodeExtraCombinators
+        ++ (builtins.map (d: jail.combinators.readwrite (jail.combinators.noescape d)) extraDirs);
     };
 in
 {
@@ -73,6 +81,6 @@ in
     makeJailedOpenCode = makeJailedOpenCode;
   };
   packages = {
-    jailedOpenCode = makeJailedOpenCode { };
+    jailedOpenCode = makeJailedOpenCode { extraDirs = [ "~/source/skill-issues/" ]; };
   };
 }
