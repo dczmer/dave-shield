@@ -157,6 +157,20 @@ The included `AGENTS.md` will be bind-mounted "read-only" to `~/.config/opencode
 4. OpenCode doesn't make it easy 'bundle' collections of subagents and skills as a single unit. You have to make a symlink for each folder individually.
 5. You can use `jail.nix` to bind-mount files into `~/.config/opencode` in order to manage config, AGENTS.md, custom subagents and skills. This effectively gets around the other issues but is more complicated.
 
+# Support for Playwright and Chromium in the sandbox
+
+To run any node-installed programs, you need to `ro-bind /usr/bin/env` for the she-bangs.
+
+You will need to install the playwright browsers as a separate package and set env vars to point to the right location:
+
+https://wiki.nixos.org/wiki/Playwright#Installing_browsers_for_Playwright_under_NixOS
+
+Example of running Chromium from inside of a sandbox: https://wiki.archlinux.org/title/Bubblewrap/Examples#Chromium
+
+I would try doing the minimal amount of rw binding possible. you don't have to bind anything under `$HOME`, because we're running Bubblewrap with a persistent home.
+
+# Support for `uv` in the sandbox
+
 # TODO
 
 - some way to manage uv/node so the agent can't install packages but i can

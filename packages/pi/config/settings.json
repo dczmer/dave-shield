@@ -1,0 +1,47 @@
+{
+  "lastChangelogVersion": "0.67.68",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "kimi-k2.5",
+  "theme": "cyberdream",
+  "enabledModels": [
+    "opencode-go/kimi-k2.5",
+    "opencode-go/minimax-m2.5",
+    "opencode-go/glm-5.1",
+    "opencode-go/qwen3.6-plus"
+  ],
+  "packages": [
+    {
+      "source": "git:github.com/aliou/pi-guardrails",
+      "extensions": [
+        "+src/index.ts"
+      ]
+    },
+    {
+      "source": "git:github.com/alisorcorp/pi-small-model-addons",
+      "extensions": [
+        "-extensions/repetition-loop-abort.ts",
+        "-extensions/write-vs-edit-guard.ts"
+      ],
+      "skills": [
+        "-skills/edit-over-write/SKILL.md",
+        "-skills/workspace-discovery/SKILL.md"
+      ]
+    },
+    {
+      "source": "git:github.com/apmantza/pi-lens",
+      "extensions": [
+        "-index.ts"
+      ],
+      "skills": [
+        "-skills/ast-grep/SKILL.md",
+        "-skills/lsp-navigation/SKILL.md"
+      ]
+    },
+    {
+      "source": "git:github.com/Gurpartap/pi-mermaid",
+      "extensions": [
+        "-index.ts"
+      ]
+    }
+  ]
+}

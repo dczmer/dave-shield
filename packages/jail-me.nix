@@ -32,6 +32,7 @@
         wget
         vim
         gnused
+        rtk
       ];
       networkCombinator =
         if hostNetwork then

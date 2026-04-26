@@ -72,6 +72,8 @@
           # OpenCode
           jailedOpenCode = jailedOpenCode.packages.jailedOpenCode;
           unjailedOpenCode = jailedOpenCode.packages.unjailedOpenCode;
+          # Pi
+          pi = pkgs.llm-agents.pi;
         };
         devShells = {
           default = pkgs.mkShell {
@@ -79,6 +81,8 @@
               uv
               nodejs
               prettierd
+              pkgs.llm-agents.pi
+              rtk
             ];
           };
         };
