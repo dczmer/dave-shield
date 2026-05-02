@@ -3,7 +3,6 @@
   jail,
   daveShield,
   skill-issues-src,
-  rtk,
   stdenv,
   symlinkJoin,
   makeWrapper,
@@ -34,7 +33,6 @@ let
     '';
   };
   openCodeExtraPkgs = [
-    rtk
   ];
   openCodeExtraCombinators = with jail.combinators; [
     # share the opencode config from my home dir.
@@ -77,7 +75,7 @@ let
       extraCombinators =
         extraCombinators
         ++ openCodeExtraCombinators
-        ++ (builtins.map (d: jail.combinators.readwrite (jail.combinators.noescape d)) extraDirs);
+        ++ (map (d: jail.combinators.readwrite (jail.combinators.noescape d)) extraDirs);
     };
 in
 {

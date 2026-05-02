@@ -38,6 +38,9 @@
         jailedOpenCode = pkgs.callPackage ./packages/opencode {
           inherit jail daveShield skill-issues-src;
         };
+        jailedPi = pkgs.callPackage ./packages/pi {
+          inherit jail daveShield;
+        };
       in
       {
         lib = {
@@ -71,9 +74,10 @@
           };
           # OpenCode
           jailedOpenCode = jailedOpenCode.packages.jailedOpenCode;
-          unjailedOpenCode = jailedOpenCode.packages.unjailedOpenCode;
+          openCode = jailedOpenCode.packages.unjailedOpenCode;
           # Pi
-          pi = pkgs.llm-agents.pi;
+          jailedPi = jailedPi.packages.jailedPi;
+          pi = jailedPi.packages.unjailedPi;
         };
         devShells = {
           default = pkgs.mkShell {
