@@ -1,3 +1,6 @@
 .direnv/
 .direnv
 result
+packages/pi/config/auth.json
+packages/pi/config/sessions
+packages/pi/config/git
