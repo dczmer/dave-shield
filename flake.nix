@@ -52,6 +52,8 @@
           jailCombinators = jail.combinators;
           # create a customized sandbox for opencode
           makeJailedOpenCode = jailedOpenCode.lib.makeJailedOpenCode;
+          #
+          makeJailedPi = jailedPi.lib.makeJailedPi;
         };
         packages = {
           # example use of daveShield interface:
