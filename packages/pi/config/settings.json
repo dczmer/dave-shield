@@ -9,5 +9,7 @@
     "opencode-go/glm-5.1",
     "opencode-go/qwen3.6-plus"
   ],
-  "packages": []
+  "packages": [
+    "../../source/dave-pi-extensions"
+  ]
 }

@@ -7,6 +7,9 @@ let
   piExtraPkgs = [];
   piExtraCombinators = with jail.combinators; [
     (readwrite (noescape "~/.pi"))
+
+    # NOTE: temporary while i'm working on this extensions package
+    (readwrite (noescape "~/source/dave-shield"))
   ];
   makeJailedPi =
     {
