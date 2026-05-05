@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "0.72.1",
   "defaultProvider": "opencode-go",
-  "defaultModel": "kimi-k2.5",
+  "defaultModel": "kimi-k2.6",
   "theme": "cyberdream",
   "enabledModels": [
     "opencode-go/kimi-k2.5",
@@ -10,6 +10,12 @@
     "opencode-go/qwen3.6-plus"
   ],
   "packages": [
-    "../../source/dave-pi-extensions"
-  ]
+    {
+      "source": "../../source/dave-pi-extensions",
+      "extensions": [
+        "+extensions/pi-gate/index.ts"
+      ]
+    }
+  ],
+  "defaultThinkingLevel": "high"
 }
