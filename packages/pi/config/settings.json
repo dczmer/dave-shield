@@ -1,21 +1,30 @@
 {
   "lastChangelogVersion": "0.72.1",
   "defaultProvider": "opencode-go",
-  "defaultModel": "kimi-k2.6",
+  "defaultModel": "deepseek-v4-pro",
   "theme": "cyberdream",
   "enabledModels": [
     "opencode-go/kimi-k2.5",
+    "opencode-go/kimi-k2.6",
     "opencode-go/minimax-m2.5",
+    "opencode-go/minimax-m2.7",
     "opencode-go/glm-5.1",
-    "opencode-go/qwen3.6-plus"
+    "opencode-go/qwen3.6-plus",
+    "opencode-go/deepseek-v4-flash",
+    "opencode-go/deepseek-v4-pro"
   ],
   "packages": [
     {
       "source": "../../source/dave-pi-extensions",
       "extensions": [
-        "+extensions/pi-gate/index.ts"
+        "+extensions/pi-gate/index.ts",
+        "-extensions/plan-mode.test.ts"
       ]
     }
   ],
-  "defaultThinkingLevel": "high"
+  "defaultThinkingLevel": "high",
+  "collapseChangelog": true,
+  "enableInstallTelemetry": false,
+  "doubleEscapeAction": "tree",
+  "treeFilterMode": "all"
 }
