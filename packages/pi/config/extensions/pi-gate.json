@@ -37,13 +37,21 @@
     "mv *",
     "pwd",
     "ls*",
-    "git ls*"
+    "git ls*",
+    "rg *",
+    "cp *",
+    "awk *",
+    "sort*",
+    "xargs*",
+    "which*",
+    "curl *"
   ],
   "externalAllow": [
     "/home/dave/.pi/agent/extensions/pi-gate.json",
     "/tmp/*",
     "/home/dave/source/dave-pi-extensions/*",
-    "/dev/null"
+    "/dev/null",
+    "/home/dave/tmp/*"
   ],
   "projectDeny": []
 }

@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "0.74.0",
   "defaultProvider": "opencode-go",
-  "defaultModel": "deepseek-v4-pro",
+  "defaultModel": "kimi-k2.6",
   "theme": "cyberdream",
   "enabledModels": [
     "opencode-go/kimi-k2.5",
@@ -22,7 +22,7 @@
       ]
     }
   ],
-  "defaultThinkingLevel": "high",
+  "defaultThinkingLevel": "medium",
   "collapseChangelog": true,
   "enableInstallTelemetry": false,
   "doubleEscapeAction": "tree",
