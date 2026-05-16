@@ -44,14 +44,17 @@
     "sort*",
     "xargs*",
     "which*",
-    "curl *"
+    "curl *",
+    "date",
+    "jq *",
+    "pi --help*"
   ],
   "externalAllow": [
     "/home/dave/.pi/agent/extensions/pi-gate.json",
     "/tmp/*",
     "/home/dave/source/dave-pi-extensions/*",
     "/dev/null",
-    "/home/dave/tmp/*"
-  ],
-  "projectDeny": []
+    "/home/dave/tmp/*",
+    "~/tmp"
+  ]
 }

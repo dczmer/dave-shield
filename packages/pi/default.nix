@@ -4,7 +4,10 @@
   daveShield,
 }:
 let
-  piExtraPkgs = [];
+  piExtraPkgs = [
+    # this should make pi available in subshells so we can implement subagents
+    llm-agents.pi
+  ];
   piExtraCombinators = with jail.combinators; [
     (readwrite (noescape "~/.pi"))
 

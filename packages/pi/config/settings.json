@@ -1,10 +1,11 @@
 {
   "lastChangelogVersion": "0.74.0",
-  "defaultProvider": "opencode-go",
-  "defaultModel": "kimi-k2.6",
+  "defaultProvider": "kimi-coding",
+  "defaultModel": "kimi-k2-thinking",
   "theme": "cyberdream",
   "enabledModels": [
-    "opencode-go/kimi-k2.5",
+    "kimi-coding/kimi-for-coding",
+    "kimi-coding/kimi-k2-thinking",
     "opencode-go/kimi-k2.6",
     "opencode-go/minimax-m2.5",
     "opencode-go/minimax-m2.7",
@@ -22,7 +23,7 @@
       ]
     }
   ],
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "high",
   "collapseChangelog": true,
   "enableInstallTelemetry": false,
   "doubleEscapeAction": "tree",
