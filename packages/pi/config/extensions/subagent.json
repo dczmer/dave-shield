@@ -1,0 +1,5 @@
+{
+  "defaultModel": "kimi-coding/kimi-for-coding",
+  "defaultThinkingLevel": "low",
+  "defaultTools": ["read", "bash", "edit", "write", "grep"]
+}

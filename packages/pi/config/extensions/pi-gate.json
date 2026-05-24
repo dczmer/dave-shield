@@ -47,7 +47,12 @@
     "curl *",
     "date",
     "jq *",
-    "pi --help*"
+    "pi --help*",
+    "tmux *",
+    "ps aux",
+    "git branch*",
+    "nixfmt*",
+    "git -C *"
   ],
   "externalAllow": [
     "/home/dave/.pi/agent/extensions/pi-gate.json",
@@ -55,6 +60,9 @@
     "/home/dave/source/dave-pi-extensions/*",
     "/dev/null",
     "/home/dave/tmp/*",
-    "~/tmp"
+    "~/tmp",
+    "~/.local/share/pi/subagents/",
+    "/tmp",
+    "~/.pi/agent/agents/*"
   ]
 }

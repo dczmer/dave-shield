@@ -13,6 +13,7 @@ let
 
     # NOTE: temporary while i'm working on this extensions package
     (readwrite (noescape "~/source/dave-shield"))
+    (readwrite (noescape "~/source/dave-pi-extensions"))
   ];
   makeJailedPi =
     {
