@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.74.0",
+  "lastChangelogVersion": "0.78.1",
   "defaultProvider": "kimi-coding",
   "defaultModel": "kimi-k2-thinking",
   "theme": "cyberdream",
@@ -16,12 +16,9 @@
   ],
   "packages": [
     {
-      "source": "../../source/dave-pi-extensions",
-      "extensions": [
-        "+extensions/pi-gate/index.ts",
-        "-extensions/plan-mode.test.ts"
-      ]
-    }
+      "source": "../../source/dave-pi-extensions"
+    },
+    "npm:pi-subagents"
   ],
   "defaultThinkingLevel": "high",
   "collapseChangelog": true,
