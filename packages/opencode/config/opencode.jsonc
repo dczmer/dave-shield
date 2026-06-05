@@ -1,9 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  // expected that we are running in a container or sandbox.
+  // always prompt for external directories as a secondary safety layer.
   "permission": {
     "*": "ask",
     "external_directory": {
       "*": "ask",
+      "~/tmp/*": "ask",
       "/tmp/*": "allow"
     },
     "read": {
@@ -25,7 +28,9 @@
       "*": "ask",
       "echo *": "allow",
       "cat *": "allow",
+      "ls": "allow",
       "ls *": "allow",
+      "echo *": "allow",
       "wc *": "allow",
       "grep *": "allow",
       "find *": "allow",
@@ -45,7 +50,24 @@
       "nix run .*": "allow",
       "luacheck *": "allow",
       "stylua *": "allow",
-      "rtk *": "allow"
+      "rtk *": "allow",
+      "cd *": "allow",
+      "sed *": "allow",
+      "true": "allow",
+      "mv *": "allow",
+      "pwd": "allow",
+      "rg *": "allow",
+      "cp *": "allow",
+      "awk *": "allow",
+      "xargs *": "allow",
+      "sort *": "allow",
+      "which *": "allow",
+      "date": "allow",
+      "date *": "allow",
+      "jq *": "allow",
+      "ps *": "allow",
+      "nixfmt*": "allow",
+      "git -C *": "allow",
     },
     "task": {
       "*": "allow"
