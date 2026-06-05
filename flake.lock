@@ -170,24 +170,7 @@
         "flake-utils": "flake-utils",
         "jail-nix": "jail-nix",
         "llm-agents": "llm-agents",
-        "nixpkgs": "nixpkgs_2",
-        "skill-issues-src": "skill-issues-src"
-      }
-    },
-    "skill-issues-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1776726005,
-        "narHash": "sha256-xJfZQU+X2p+vsqXaZsa0ZwXuyREFmsYKel3E1oP02vU=",
-        "owner": "dczmer",
-        "repo": "skill-issues",
-        "rev": "0ac863e55078d4b1554dca22d6d8ac950c9ea4e0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "dczmer",
-        "repo": "skill-issues",
-        "type": "github"
+        "nixpkgs": "nixpkgs_2"
       }
     },
     "systems": {
