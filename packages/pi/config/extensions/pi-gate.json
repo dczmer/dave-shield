@@ -63,6 +63,7 @@
     "~/tmp",
     "~/.local/share/pi/subagents/",
     "/tmp",
-    "~/.pi/agent/agents/*"
+    "~/.pi/agent/agents/*",
+    "/home/dave/.pi/agent/*"
   ]
 }

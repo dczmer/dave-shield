@@ -30,8 +30,8 @@ let
     # bind the managed AGENTS.md file into the sandbox environment.
     (ro-bind "${configDir}/config/AGENTS.md" (noescape "~/.config/opencode/AGENTS.md"))
     # bind skill-issues agents and skill files
-    (try-ro-bind (noescape "~/source/unskills") (noescape "~/.config/opencode/skills/unskills"))
-    (try-ro-bind (noescape "~/source/unskills/agents") (noescape "~/.config/opencode/agents/unskills"))
+    (try-rw-bind (noescape "~/source/unskills") (noescape "~/.config/opencode/skills/unskills"))
+    (try-rw-bind (noescape "~/source/unskills/agents") (noescape "~/.config/opencode/agents/unskills"))
   ];
   wrappedOpenCode = symlinkJoin {
     name = "opencode";

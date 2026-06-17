@@ -1,7 +1,7 @@
 {
   "lastChangelogVersion": "0.78.1",
   "defaultProvider": "kimi-coding",
-  "defaultModel": "kimi-k2-thinking",
+  "defaultModel": "kimi-for-coding",
   "theme": "cyberdream",
   "enabledModels": [
     "kimi-coding/kimi-for-coding",
@@ -18,9 +18,10 @@
     {
       "source": "../../source/dave-pi-extensions"
     },
-    "npm:pi-subagents"
+    "npm:pi-subagents",
+    "npm:pi-web-access"
   ],
-  "defaultThinkingLevel": "high",
+  "defaultThinkingLevel": "off",
   "collapseChangelog": true,
   "enableInstallTelemetry": false,
   "doubleEscapeAction": "tree",
