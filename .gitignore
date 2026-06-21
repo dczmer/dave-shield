@@ -6,3 +6,6 @@ packages/pi/config/sessions
 packages/pi/config/git
 node_modules
 **/node_modules
+packages/pi/config/intercom
+packages/pi/config/run-history.jsonl
+packages/pi/config/trust.jsonl

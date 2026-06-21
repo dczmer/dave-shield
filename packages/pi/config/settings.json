@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.78.1",
+  "lastChangelogVersion": "0.79.1",
   "defaultProvider": "kimi-coding",
   "defaultModel": "kimi-for-coding",
   "theme": "cyberdream",
@@ -16,12 +16,22 @@
   ],
   "packages": [
     {
-      "source": "../../source/dave-pi-extensions"
+      "source": "../../source/dave-pi-extensions",
+      "extensions": [
+        "-extensions/rtk-bash-wrapper.ts",
+        "-extensions/error-logger/index.ts",
+        "-extensions/pi-gate/index.ts",
+        "-extensions/plan-mode/index.ts"
+      ]
     },
+    "npm:pi-web-access",
     "npm:pi-subagents",
-    "npm:pi-web-access"
+    "git:github.com/obra/superpowers",
+    "npm:pi-intercom",
+    "git:github.com/DietrichGebert/ponytail",
+    "npm:pi-provider-kimi-code"
   ],
-  "defaultThinkingLevel": "off",
+  "defaultThinkingLevel": "high",
   "collapseChangelog": true,
   "enableInstallTelemetry": false,
   "doubleEscapeAction": "tree",

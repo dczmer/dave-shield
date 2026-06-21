@@ -64,6 +64,7 @@
     "~/.local/share/pi/subagents/",
     "/tmp",
     "~/.pi/agent/agents/*",
-    "/home/dave/.pi/agent/*"
+    "/home/dave/.pi/agent/*",
+    "/home/dave/.pi/artifacts/*"
   ]
 }
