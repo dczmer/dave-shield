@@ -1,13 +1,11 @@
 {
-  "lastChangelogVersion": "0.79.1",
+  "lastChangelogVersion": "0.80.3",
   "defaultProvider": "kimi-coding",
   "defaultModel": "kimi-for-coding",
   "theme": "cyberdream",
   "enabledModels": [
     "kimi-coding/kimi-for-coding",
-    "kimi-coding/kimi-k2-thinking",
     "opencode-go/kimi-k2.6",
-    "opencode-go/minimax-m2.5",
     "opencode-go/minimax-m2.7",
     "opencode-go/glm-5.1",
     "opencode-go/qwen3.6-plus",
@@ -20,13 +18,34 @@
       "extensions": [
         "-extensions/rtk-bash-wrapper.ts",
         "-extensions/error-logger/index.ts",
-        "-extensions/pi-gate/index.ts",
-        "-extensions/plan-mode/index.ts"
+        "-extensions/plan-mode/index.ts",
+        "+extensions/pi-gate/index.ts"
       ]
     },
     "npm:pi-web-access",
     "npm:pi-subagents",
-    "git:github.com/obra/superpowers",
+    {
+      "source": "git:github.com/obra/superpowers",
+      "extensions": [
+        "-.pi/extensions/superpowers.ts"
+      ],
+      "skills": [
+        "-skills/brainstorming/SKILL.md",
+        "-skills/dispatching-parallel-agents/SKILL.md",
+        "-skills/executing-plans/SKILL.md",
+        "-skills/finishing-a-development-branch/SKILL.md",
+        "-skills/receiving-code-review/SKILL.md",
+        "-skills/requesting-code-review/SKILL.md",
+        "-skills/subagent-driven-development/SKILL.md",
+        "-skills/systematic-debugging/SKILL.md",
+        "-skills/test-driven-development/SKILL.md",
+        "-skills/using-git-worktrees/SKILL.md",
+        "-skills/using-superpowers/SKILL.md",
+        "-skills/verification-before-completion/SKILL.md",
+        "-skills/writing-plans/SKILL.md",
+        "-skills/writing-skills/SKILL.md"
+      ]
+    },
     "npm:pi-intercom",
     "git:github.com/DietrichGebert/ponytail",
     "npm:pi-provider-kimi-code"

@@ -52,7 +52,8 @@
     "ps aux",
     "git branch*",
     "nixfmt*",
-    "git -C *"
+    "git -C *",
+    "pi *"
   ],
   "externalAllow": [
     "/home/dave/.pi/agent/extensions/pi-gate.json",
