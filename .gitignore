@@ -9,3 +9,4 @@ node_modules
 packages/pi/config/intercom
 packages/pi/config/run-history.jsonl
 packages/pi/config/trust.jsonl
+.pi-subagents

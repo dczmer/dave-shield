@@ -6,6 +6,7 @@
 }:
 let
   piExtraPkgs = [
+    llm-agents.pi
   ];
   piExtraCombinators = with jail.combinators; [
     (readwrite (noescape "~/.pi"))
