@@ -4,29 +4,6 @@
   ...
 }:
 let
-  commonPkgs = with pkgs; [
-    bashInteractive
-    curl
-    wget
-    jq
-    git
-    which
-    ripgrep
-    gnugrep
-    gawkInteractive
-    ps
-    findutils
-    gzip
-    unzip
-    gnutar
-    diffutils
-    coreutils
-    tree
-    file
-    wget
-    vim
-    gnused
-  ];
   jailedCombinators =
     {
       name,
@@ -44,7 +21,6 @@ let
         # mount-cwd AFTER persist-home or it will conflict
         mount-cwd
         # add these pkgs bin/ directories to $path
-        (add-pkg-deps commonPkgs)
         (add-pkg-deps extraPkgs)
         (set-env "EDITOR" "vim")
       ]

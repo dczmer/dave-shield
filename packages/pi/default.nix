@@ -38,6 +38,5 @@ in
   };
   packages = {
     jailedPi = makeJailedPi { };
-    unjailedPi = llm-agents.pi;
   };
 }

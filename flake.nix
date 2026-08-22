@@ -21,6 +21,10 @@
           config.allowUnfree = true;
           overlays = [ llm-agents.overlays.shared-nixpkgs ];
         };
+        # common packages for all sandboxes
+        commonPkgs = import ./packages/commonPkgs.nix {
+          inherit pkgs;
+        };
         # jail-me library
         jail = jail-nix.lib.init pkgs;
         jailMe = import ./packages/jail-me.nix {
@@ -41,9 +45,9 @@
           # use the same combinators from the version this flake is using:
           jailCombinators = jail.combinators;
           # create a customized sandbox for opencode
-          makeJailedOpenCode = jailedOpenCode.lib.makeJailedOpenCode;
+          makeJailedOpenCode = jailedOpenCode.lib.makeJailedOpenCode commonPkgs;
           # create a customized sandbox for pi
-          makeJailedPi = jailedPi.lib.makeJailedPi;
+          makeJailedPi = jailedPi.lib.makeJailedPi commonPkgs;
         };
         packages = {
           # example use of daveShield interface:
@@ -55,7 +59,7 @@
             extraPkgs = with pkgs; [
               nethack
               iputils
-            ];
+            ] ++ commonPkgs;
             # additional combinators to customize
             extraCombinators = with jail.combinators; [
               (wrap-entry (entry: ''
@@ -67,10 +71,10 @@
           };
           # OpenCode
           jailedOpenCode = jailedOpenCode.packages.jailedOpenCode;
-          openCode = jailedOpenCode.packages.unjailedOpenCode;
+          openCode = pkgs.llm-agents.opencode;
           # Pi
           jailedPi = jailedPi.packages.jailedPi;
-          pi = jailedPi.packages.unjailedPi;
+          pi = pkgs.llm-agents.pi;
         };
         devShells = {
           default = pkgs.mkShell {
