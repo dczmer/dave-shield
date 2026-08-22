@@ -1,11 +1,12 @@
 {
-  pkgs,
   llm-agents,
   jail,
-  daveShield,
+  jailMe,
+  ...
 }:
 let
   piExtraPkgs = [
+    # so it can invoke headless sessions directly
     llm-agents.pi
   ];
   piExtraCombinators = with jail.combinators; [
@@ -21,7 +22,8 @@ let
       extraDirs ? [ ],
       extraCombinators ? [ ],
     }:
-    daveShield {
+    jailMe {
+      name = "pi-jailed";
       exec = llm-agents.pi;
       extraPkgs = extraPkgs ++ piExtraPkgs;
       extraCombinators =

@@ -1,10 +1,11 @@
 {
   llm-agents,
   jail,
-  daveShield,
+  jailMe,
   stdenv,
   symlinkJoin,
   makeWrapper,
+  ...
 }:
 let
   configDir = stdenv.mkDerivation {
@@ -20,6 +21,8 @@ let
     '';
   };
   openCodeExtraPkgs = [
+    # so it can invoke headless sessions directly
+    llm-agents.opencode
   ];
   openCodeExtraCombinators = with jail.combinators; [
     # share the opencode config from my home dir.
@@ -55,7 +58,8 @@ let
       extraDirs ? [ ],
       extraCombinators ? [ ],
     }:
-    daveShield {
+    jailMe {
+      name = "opencode-jailed";
       exec = wrappedOpenCode;
       extraPkgs = extraPkgs ++ openCodeExtraPkgs;
       extraCombinators =

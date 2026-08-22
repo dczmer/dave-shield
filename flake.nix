@@ -19,40 +19,36 @@
         pkgs = import nixpkgs {
           inherit system;
           config.allowUnfree = true;
-          overlays = [ llm-agents.overlays.default ];
+          overlays = [ llm-agents.overlays.shared-nixpkgs ];
         };
         # jail-me library
         jail = jail-nix.lib.init pkgs;
-        jailMeLib = import ./packages/jail-me.nix {
+        jailMe = import ./packages/jail-me.nix {
           inherit pkgs jail;
-        };
-        daveShield = jailMeLib.init {
-          name = "dave-shield";
         };
         # agents
         jailedOpenCode = pkgs.callPackage ./packages/opencode {
-          inherit jail daveShield;
+          inherit jail jailMe;
         };
         jailedPi = pkgs.callPackage ./packages/pi {
-          inherit jail daveShield;
+          inherit jail jailMe;
         };
       in
       {
         lib = {
-          # use daveShield for shared persistent home dir across applications.
-          daveShield = daveShield;
           # use jailMe.init "name" to create an env with a different name and home dir.
-          jailMeLib = jailMeLib;
+          jailMeLib = jailMe;
           # use the same combinators from the version this flake is using:
           jailCombinators = jail.combinators;
           # create a customized sandbox for opencode
           makeJailedOpenCode = jailedOpenCode.lib.makeJailedOpenCode;
-          #
+          # create a customized sandbox for pi
           makeJailedPi = jailedPi.lib.makeJailedPi;
         };
         packages = {
           # example use of daveShield interface:
-          jailedShell = daveShield {
+          jailedShell = jailMe {
+            name = "jaied-shell";
             # executable to sand-box
             exec = pkgs.bash;
             # extra packages to make available
@@ -82,8 +78,7 @@
               uv
               nodejs
               prettierd
-              pkgs.llm-agents.pi
-              rtk
+              jailedPi.packages.jailedPi
             ];
           };
         };
