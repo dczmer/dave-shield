@@ -31,7 +31,7 @@ let
     (readwrite (noescape "~/.local/share/opencode"))
     (readwrite (noescape "~/.local/state/opencode"))
   ];
-  wrappedOpenCode = symlinkJoin {
+  wrappedOpencode = symlinkJoin {
     name = "opencode";
     paths = [
       pkgs.llm-agents.opencode
@@ -47,7 +47,7 @@ let
       mainProgram = "opencode";
     };
   };
-  makeJailedOpenCode =
+  makeJailedOpencode =
     {
       extraPkgs ? [ ],
       extraDirs ? [ ],
@@ -55,7 +55,7 @@ let
     }:
     jailMe {
       name = "opencode-jailed";
-      exec = wrappedOpenCode;
+      exec = wrappedOpencode;
       extraPkgs = extraPkgs ++ openCodeExtraPkgs;
       extraCombinators =
         extraCombinators
@@ -65,9 +65,9 @@ let
 in
 {
   lib = {
-    makeJailedOpenCode = makeJailedOpenCode;
+    makeJailedOpencode = makeJailedOpencode;
   };
   packages = {
-    unjailedOpenCode = wrappedOpenCode;
+    unjailedOpencode = wrappedOpencode;
   };
 }

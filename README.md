@@ -29,11 +29,18 @@ Research and implementation of isolated and sandboxing solutions and techniques 
 
 # Packages What I Made
 
-## dave-shield (jail.nix)
+## jailMe (jail.nix)
 
-[jail.nix on GitHub](https://github.com/MohrJonas/jail.nix)
+A wrapper over [jail.nix](https://github.com/MohrJonas/jail.nix) that bundles some common configuration and packages that you can use to quickly sandbox any agent application.
 
 `jail.nix` is a `nix` wrapper for configuring sandboxed environments using `bubblewrap`. It's focused on preventing privilege escalation by blocking `setuid` programs and provides a high-level interface for configuring `linux namespaces` for isolation.
+
+`jailMe` configuration:
+- Uses a persistent `$HOME` directory `~/.local/share/jail.nix/home/dave-shield`.
+- Sets a fake `hostname` (default `dave-shield`).
+- Shares the host network by default.
+- Mounts the current working directory (your project source directory for example).
+- Installs a few useful command line tools, like `coreutils`, `curl`, etc.
 
 Pros:
 - Nicely sandboxed: PIDs, IPC, users, file-system.
@@ -49,103 +56,149 @@ Cons:
 - No kernel protection, like `gVisor` (but could use with SELinux or AppArmor).
 - No audit or alerts for violations.
 
-I use it to make `devShells` or custom packages to run with `nix run`.
-
-The `daveShell` library method builds wraps a program in a pre-configured sandbox environment. It has the following configuration:
-
-- Uses a persistent `$HOME` directory `~/.local/share/jail.nix/home/dave-shield`.
-- Sets `hostname` to `dave-shield`.
-- Shares the host network by default.
-- Mounts the current working directory (your project source directory for example).
-- Installs a few useful command line tools, like `coreutils`, `curl`, etc.
+### How to use it
 
 ```nix
+let
+  jail = jail-nix.lib.init pkgs;
+  jailMe = import ./packages/jail-me.nix {
+    inherit pkgs jail;
+    };
+in
 {
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-    dave-shield.url = "github:dczmer/dave-shield";
+  packages = {
+    jailed-app = jailMe {
+      name = "jailed-app";
+      exec = pkgs.bash;
+      # OPTIONAL: defaults to true
+      hostNetwork = true;
+      # OPTIONAL: additional packages available in the sandbox
+      extraPkgs = with pkgs; [ ... ];
+      # OPTIONAL: additional combinators config
+      extraCombinators = with jail.combinators; [ ... ];
+    };
   };
-  outputs =
-    {
-      self,
-      nixpkgs,
-      flake-utils,
-      dave-shield,
-    }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        daveShield = dave-shield.lib.${system}.daveShield;
-      in
-      {
-        packages = {
-          jailedShell = daveShield { exec = pkgs.bash; };
-        };
-      }
-    );
 }
 ```
 
-To add more packages to your environment, pass the `extraPkgs` option:
+## Latest versions via `llm-agents`.
 
-```nix
-jailedshell = daveshield {
-  exec = pkgs.bash;
-  extrapkgs = with pkgs; [
-    # additional packages
-    uv
-  ];
-};
+The [llm-agents.nix](https://github.com/numtide/llm-agents.nix) project adds packages for most popular agentic coding applications, updated daily.
+
+I'm using this to make the jailed/sandboxed agents, but I've also added the un-sandboxed packages.
+
+```bash
+nix run .#opencode
+nix run .#pi
 ```
 
-Customize the sandbox by with additional [combinators](https://alexdav.id/projects/jail-nix/combinators/):
+## Jailed Agents
 
-```nix
-jailedshell = daveshield {
-  exec = pkgs.bash;
-  extraCombinators = with dave-shield.lib.${system}.jailCombinators; [
-    # additional combinators
-    (rw-bind "/foo" "/bar")
-    (wrap-entry (entry: ''
-      echo 'Inside the jail!'
-      ${entry}
-      echo 'Cleaning up...'
-    ''))
-  ];
-};
+Agents wrapped with the `jailMe` function to provide a common system environment and persistent home directory. Each jailed agent has customized configuration to allow that agent to work inside of the restricted sandbox.
+
+```bash
+nix run .#jailedOpencode
+nix run .#jailedPi
 ```
 
-> NOTE: I exported `jail.combinators` from the version of `jail.nix` used in the `dave-shield` flake. Use the provided `lib.jailCombinators` instead of adding `jail.nix` as an input for your own flake, to make sure we don't have issues due to conflicting versions of dependencies.
+Install into your profile for easier use:
 
-Customize further by initializing a new sandbox configuration, instead of using the provided `daveShield`:
-
-```nix
-myShield = dave-shield.lib.${system}.jailMeLib.init {
-  # will use hostname `myShield`.
-  # will use persistent home dir `~/.local/share/jail.nix/home/myShield/`.
-  name = "myShield";
-  # will completely isolate from host network
-  hostNetwork = false;
-};
-jailedShell = myShield { exec = pkgs.bash; };
+```bash
+nix profile add .#jailedOpencode
+opencode-jailed
 ```
-## Jailed OpenCode
 
-[Personal OpenCode config using daveShield](./packages/opencode/README.md).
+```bash
+nix profile add .#jailedPi
+pi-jailed
+```
+## containers
+
+Good isolation by running the agent on a container.
+
+- File-system:
+  * ephemeral FS
+  * persistent /root volume for saving configuration
+  * bind-mount your project root (and any other folders you need)
+- Network:
+  * able to access internet by default, no firewall or http filtering
+  * or, use a host-only network and proxy requests to the internet and filter traffic
+- PID/IPC/etc.:
+  * all isolated
+- `setuid` protection with `--runtime=runsc` (`gVisor`)
+    
+### pi-container
+
+Build and load the container:
+```bash
+nix build .#piContainer
+docker load < result
+```
+
+Launch it (I make a script and add it to my PATH):
+```bash
+# ensure persistent volume created
+docker volume inspect davehome >/dev/null 2>&1 \
+    || docker volume create davehome
+
+docker run --rm  -e LOCAL_USER_ID="$(id -u)" \
+    -v "$(pwd)":/source \
+    -v davehome:/root \
+    -v /home/dave/source/dave-shield/packages/pi/config:/root/.pi/agent \
+    -it pi-coding-agent-container:latest
+```
+
+- Bind a persistent volume to `/root` to save any changes to the home directory.
+- Bind the current working dir (project root) to `/source` on the container.
+- Bind the required config and/or other shared directories needed for operation.
+- I don't think the `LOCAL_USER_ID` part is required but try it if you have file permissions issues.
+
+### opencode-container
+
+Build and load the container:
+```bash
+nix build .#opencodeContainer
+docker load < result
+```
+
+Launch it (I make a script and add it to my PATH):
+```bash
+# ensure persistent volume created
+docker volume inspect davehome >/dev/null 2>&1 \
+    || docker volume create davehome
+
+docker run --rm  -e LOCAL_USER_ID="$(id -u)" \
+    -v "$(pwd)":/source \
+    -v davehome:/root \
+    -v /home/dave/.config/opencode:/root/.config/opencode \
+    -it opencode-container:latest
+```
+
+- Bind a persistent volume to `/root` to save any changes to the home directory.
+- Bind the current working dir (project root) to `/source` on the container.
+- Bind the required config and/or other shared directories needed for operation.
+
+## docker sandboxes
+
+TODO: docker has it's own sandbox and a new mcp gateway thing to investigate.
 
 ## dave-opensandbox
 
 TODO: See what we can do with OpenSandbox.
 
+## dave-proxy
+
+TODO: network proxy to filter traffic. isolate container network and only allow traffic over white-list of domains and ips.
+
+Example: https://sharats.me/posts/docker-with-proxy/
+
 ## dave-namespaces
 
 TODO: Notes and scripts for working with namespaces; Script to manage an isolated network namespace we can use with the other sandboxes.
 
-## dave-proxy
+OS-level isolation. The system that docker manages to create isolated containers. You can use it directly (if you use Linux).
 
-TODO: Squid proxy to filter HTTP traffic.
+I already did a deep dive into managing namespaces. Merge notes into `docs`, create some helper packages/scripts, write about it here.
 
 # General Suggestions
 
@@ -228,11 +281,11 @@ I didn't spend a lot of time on this because OpenSandbox sounded like a better s
 
 # Virtual Machines
 
-TODO: The easiest way to get full isolation and (possibly) kernel-level protection. Adds some overhead but can be mitigated with custom hypervisors like `firecracker-vim`. Row-hammer is still a thing, but you can't do much about that. Can also use a 'guest' kernel, like `gVisor`.
+The easiest way to get full isolation and (possibly) kernel-level protection. Adds some overhead but can be mitigated with custom hypervisors like `firecracker-vim`. Row-hammer is still a thing, but you can't do much about that. Can also use a 'guest' kernel, like `gVisor`.
 
 # chroot jails
 
-TODO: The classic way to isolate a process from the rest of the file-system. `chroot` inside of a sandbox, or is that a hat on a hat?
+The classic way to isolate a process from the rest of the file-system. Doesn't really give process/IPC/etc isolation though. It just prevents the application from accessing things outside of the jail directory. Might be useful still if applied along with namespaces and file-system isolation.
 
 # namespaces and cgroups
 
@@ -254,7 +307,7 @@ TODO: Even higher-level wrapper for `bubblewrap`, used to sandbox `nix` packages
 
 # Containerization
 
-## docker/etc
+## docker/podman
 
 TODO: Exactly what kind of isolation does `docker` provide by default? What can be configured? Uses the same kernel, does not shield from kernel-level exploits. Container escapes? Exfiltration from mounted file-systems and socket files?
 seccomp profiles.

@@ -31,7 +31,7 @@
           inherit pkgs jail;
         };
         # agents
-        jailedOpenCode = pkgs.callPackage ./packages/opencode {
+        jailedOpencode = pkgs.callPackage ./packages/opencode {
           inherit jail jailMe;
         };
         jailedPi = pkgs.callPackage ./packages/pi {
@@ -52,7 +52,7 @@
           # use the same combinators from the version this flake is using:
           jailCombinators = jail.combinators;
           # create a customized sandbox for opencode
-          makeJailedOpenCode = jailedOpenCode.lib.makeJailedOpenCode;
+          makeJailedOpencode = jailedOpencode.lib.makeJailedOpencode;
           # create a customized sandbox for pi
           makeJailedPi = jailedPi.lib.makeJailedPi;
         };
@@ -82,11 +82,11 @@
 
           #
           ######################################################################
-          # OpenCode
+          # Opencode
           ######################################################################
           #
-          openCode = jailedOpenCode.packages.unjailedOpenCode;
-          jailedOpenCode = lib.makeJailedOpenCode { extraPkgs = commonPkgs; };
+          opencode = jailedOpencode.packages.unjailedOpencode;
+          jailedOpencode = lib.makeJailedOpencode { extraPkgs = commonPkgs; };
           # To build the container:
           # ```
           # nix build .#opencodeContainer
