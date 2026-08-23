@@ -37,6 +37,13 @@
         jailedPi = pkgs.callPackage ./packages/pi {
           inherit jail jailMe;
         };
+        # containers
+        piContainer = import ./packages/pi/pi-container.nix {
+          inherit pkgs commonPkgs;
+        };
+        opencodeContainer = import ./packages/opencode/opencode-container.nix {
+          inherit pkgs commonPkgs;
+        };
       in
       rec {
         lib = {
@@ -72,12 +79,47 @@
               ''))
             ];
           };
+
+          #
+          ######################################################################
           # OpenCode
-          jailedOpenCode = lib.makeJailedOpenCode { extraPkgs = commonPkgs; };
+          ######################################################################
+          #
           openCode = jailedOpenCode.packages.unjailedOpenCode;
+          jailedOpenCode = lib.makeJailedOpenCode { extraPkgs = commonPkgs; };
+          # To build the container:
+          # ```
+          # nix build .#opencodeContainer
+          # docker load < result
+          # ```
+          #
+          # Then run it (and add your own network/binds/etc):
+          # ```
+          # docker run -v "$(pwd):/source" -it opencode-container
+          # ```
+          opencodeContainer = opencodeContainer;
+          ######################################################################
+          ######################################################################
+          #
+          ######################################################################
           # Pi
-          jailedPi = lib.makeJailedPi { extraPkgs = commonPkgs; };
+          ######################################################################
+          #
           pi = pkgs.llm-agents.pi;
+          jailedPi = lib.makeJailedPi { extraPkgs = commonPkgs; };
+          # To build the container:
+          # ```
+          # nix build .#piContainer
+          # docker load < result
+          # ```
+          #
+          # Then run it (and add your own network/binds/etc):
+          # ```
+          # docker run -v "$(pwd):/source" -it pi-coding-agent-container
+          # ```
+          piContainer = piContainer;
+          ######################################################################
+          ######################################################################
         };
         devShells = {
           default = pkgs.mkShell {
