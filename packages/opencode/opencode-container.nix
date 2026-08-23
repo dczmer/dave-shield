@@ -37,7 +37,12 @@ pkgs.dockerTools.buildImage {
     Cmd = [ "${pkgs.llm-agents.opencode}/bin/opencode" ];
     #Volumes = { };
     WorkingDir = "/source";
-    Env = [ "OPENCODE_CONFIG_DIR=/root/.config/opencode" ];
+    Env = [
+      "XDG_CONFIG_HOME=/root/.config"
+      "XDG_CACHE_HOME=/root/.cache"
+      "XDG_DATA_HOME=/root/.local/share"
+      "XDG_STATE_HOME=/root/.local/state"
+    ];
   };
 
   # NOTE: do not use fakeNss with shadowSetup

@@ -37,7 +37,13 @@ pkgs.dockerTools.buildImage {
     Cmd = [ "${pkgs.llm-agents.pi}/bin/pi" ];
     #Volumes = { };
     WorkingDir = "/source";
-    Env = [ "PI_CODING_AGENT_DIR=/root/.pi/agent" ];
+    Env = [
+      "PI_CODING_AGENT_DIR=/root/.pi/agent"
+      "XDG_CONFIG_HOME=/root/.config"
+      "XDG_CACHE_HOME=/root/.cache"
+      "XDG_DATA_HOME=/root/.local/share"
+      "XDG_STATE_HOME=/root/.local/state"
+    ];
   };
 
   # NOTE: do not use fakeNss with shadowSetup
