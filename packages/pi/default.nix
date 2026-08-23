@@ -1,5 +1,5 @@
 {
-  llm-agents,
+  pkgs,
   jail,
   jailMe,
   ...
@@ -7,14 +7,10 @@
 let
   piExtraPkgs = [
     # so it can invoke headless sessions directly
-    llm-agents.pi
+    pkgs.llm-agents.pi
   ];
   piExtraCombinators = with jail.combinators; [
     (readwrite (noescape "~/.pi"))
-
-    # NOTE: temporary while i'm working on this extensions package
-    (readwrite (noescape "~/source/dave-shield"))
-    (readwrite (noescape "~/source/dave-pi-extensions"))
   ];
   makeJailedPi =
     {
@@ -24,7 +20,7 @@ let
     }:
     jailMe {
       name = "pi-jailed";
-      exec = llm-agents.pi;
+      exec = pkgs.llm-agents.pi;
       extraPkgs = extraPkgs ++ piExtraPkgs;
       extraCombinators =
         extraCombinators
@@ -35,8 +31,5 @@ in
 {
   lib = {
     makeJailedPi = makeJailedPi;
-  };
-  packages = {
-    jailedPi = makeJailedPi { };
   };
 }

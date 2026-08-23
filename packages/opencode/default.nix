@@ -1,5 +1,5 @@
 {
-  llm-agents,
+  pkgs,
   jail,
   jailMe,
   stdenv,
@@ -22,7 +22,7 @@ let
   };
   openCodeExtraPkgs = [
     # so it can invoke headless sessions directly
-    llm-agents.opencode
+    pkgs.llm-agents.opencode
   ];
   openCodeExtraCombinators = with jail.combinators; [
     # share the opencode config from my home dir.
@@ -30,16 +30,11 @@ let
     (readwrite (noescape "~/.config/opencode"))
     (readwrite (noescape "~/.local/share/opencode"))
     (readwrite (noescape "~/.local/state/opencode"))
-    # bind the managed AGENTS.md file into the sandbox environment.
-    (ro-bind "${configDir}/config/AGENTS.md" (noescape "~/.config/opencode/AGENTS.md"))
-    # bind skill-issues agents and skill files
-    (try-rw-bind (noescape "~/source/unskills") (noescape "~/.config/opencode/skills/unskills"))
-    (try-rw-bind (noescape "~/source/unskills/agents") (noescape "~/.config/opencode/agents/unskills"))
   ];
   wrappedOpenCode = symlinkJoin {
     name = "opencode";
     paths = [
-      llm-agents.opencode
+      pkgs.llm-agents.opencode
       configDir
     ];
     buildInputs = [ makeWrapper ];
@@ -73,7 +68,6 @@ in
     makeJailedOpenCode = makeJailedOpenCode;
   };
   packages = {
-    jailedOpenCode = makeJailedOpenCode { };
     unjailedOpenCode = wrappedOpenCode;
   };
 }

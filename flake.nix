@@ -1,5 +1,5 @@
 {
-  description = "Flake template";
+  description = "Experiments in packaging and sandboxing coding agents.";
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     jail-nix.url = "sourcehut:~alexdavid/jail.nix";
@@ -38,16 +38,16 @@
           inherit jail jailMe;
         };
       in
-      {
+      rec {
         lib = {
           # use jailMe.init "name" to create an env with a different name and home dir.
           jailMeLib = jailMe;
           # use the same combinators from the version this flake is using:
           jailCombinators = jail.combinators;
           # create a customized sandbox for opencode
-          makeJailedOpenCode = jailedOpenCode.lib.makeJailedOpenCode commonPkgs;
+          makeJailedOpenCode = jailedOpenCode.lib.makeJailedOpenCode;
           # create a customized sandbox for pi
-          makeJailedPi = jailedPi.lib.makeJailedPi commonPkgs;
+          makeJailedPi = jailedPi.lib.makeJailedPi;
         };
         packages = {
           # example use of daveShield interface:
@@ -56,10 +56,13 @@
             # executable to sand-box
             exec = pkgs.bash;
             # extra packages to make available
-            extraPkgs = with pkgs; [
-              nethack
-              iputils
-            ] ++ commonPkgs;
+            extraPkgs =
+              with pkgs;
+              [
+                nethack
+                iputils
+              ]
+              ++ commonPkgs;
             # additional combinators to customize
             extraCombinators = with jail.combinators; [
               (wrap-entry (entry: ''
@@ -70,10 +73,10 @@
             ];
           };
           # OpenCode
-          jailedOpenCode = jailedOpenCode.packages.jailedOpenCode;
-          openCode = pkgs.llm-agents.opencode;
+          jailedOpenCode = lib.makeJailedOpenCode { extraPkgs = commonPkgs; };
+          openCode = jailedOpenCode.packages.unjailedOpenCode;
           # Pi
-          jailedPi = jailedPi.packages.jailedPi;
+          jailedPi = lib.makeJailedPi { extraPkgs = commonPkgs; };
           pi = pkgs.llm-agents.pi;
         };
         devShells = {
@@ -82,7 +85,7 @@
               uv
               nodejs
               prettierd
-              jailedPi.packages.jailedPi
+              packages.jailedPi
             ];
           };
         };
