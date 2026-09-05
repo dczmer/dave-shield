@@ -105,7 +105,8 @@
           # Pi
           ######################################################################
           #
-          pi = pkgs.llm-agents.pi;
+          # pi with nodejs/npm available on PATH (for npm-based extensions/skills)
+          pi = jailedPi.packages.piWithNode;
           jailedPi = lib.makeJailedPi { extraPkgs = commonPkgs; };
           # To build the container:
           # ```
