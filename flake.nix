@@ -85,7 +85,7 @@
           # Opencode
           ######################################################################
           #
-          opencode = jailedOpencode.packages.unjailedOpencode;
+          opencode = pkgs.llm-agents.opencode;
           jailedOpencode = lib.makeJailedOpencode { extraPkgs = commonPkgs; };
           # To build the container:
           # ```
