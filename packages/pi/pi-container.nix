@@ -38,6 +38,7 @@ pkgs.dockerTools.buildImage {
     #Volumes = { };
     WorkingDir = "/source";
     Env = [
+      "HOME=/root"
       "PI_CODING_AGENT_DIR=/root/.pi/agent"
       "XDG_CONFIG_HOME=/root/.config"
       "XDG_CACHE_HOME=/root/.cache"
