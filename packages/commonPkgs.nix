@@ -24,6 +24,7 @@ with pkgs;
   wget
   vim
   gnused
+  xclip
 
   # add more common dependencies here.
   # or export a lib function and take a list of extraPkgs as an argument.
