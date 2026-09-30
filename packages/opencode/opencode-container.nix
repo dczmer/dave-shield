@@ -1,3 +1,9 @@
+# To build the container (from project root directory):
+# ```
+# nix build .#opencodeContainer
+# docker load < result
+# ```
+#
 # Example of how to run the container from a project repo:
 # ```
 # # create a persistent /root volume
@@ -21,7 +27,7 @@ pkgs.dockerTools.buildImage {
   copyToRoot =
     with pkgs;
     [
-      pkgs.llm-agents.opencode
+      pkgs.llm-agents.opencode2
 
       # these make the docker environment a little more useful.
       dockerTools.usrBinEnv

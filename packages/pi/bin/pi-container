@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+docker volume inspect davehome >/dev/null 2>&1 \
+    || docker volume create davehome
+
+docker run --rm  -e LOCAL_USER_ID="$(id -u)" \
+    -v "$(pwd)":/source \
+    -v davehome:/root \
+    -v /home/dave/.pi/agent:/root/.pi/agent \
+    -v /home/dave/source:/home/dave/source \
+    --entrypoint bash \
+    -it pi-coding-agent-container:latest

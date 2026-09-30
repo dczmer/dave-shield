@@ -7,7 +7,7 @@
 let
   openCodeExtraPkgs = [
     # so it can invoke headless sessions directly
-    pkgs.llm-agents.opencode
+    pkgs.llm-agents.opencode2
   ];
   openCodeExtraCombinators = with jail.combinators; [
     # share the opencode config from my home dir.
@@ -24,7 +24,7 @@ let
     }:
     jailMe {
       name = "opencode-jailed";
-      exec = pkgs.llm-agents.opencode;
+      exec = pkgs.llm-agents.opencode2;
       extraPkgs = extraPkgs ++ openCodeExtraPkgs;
       extraCombinators =
         extraCombinators
